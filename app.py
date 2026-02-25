@@ -23,6 +23,17 @@ if option == "Rectangle in a Circle":
     A = 4*x*y
 
     st.write(f"Area = {A:.2f}")
+    st.subheader("Mathematical Model")
+
+    st.latex(r"x^2 + y^2 = 25")
+
+    st.latex(r"y=\sqrt{25-x^2}")
+
+    st.latex(r"A(x)=4x\sqrt{25-x^2}")
+
+    st.latex(
+    rf"A({x:.2f}) = 4({x:.2f})\sqrt{{25-({x:.2f})^2}} = {A:.2f}"
+    )
 
     fig, ax = plt.subplots()
 
@@ -50,6 +61,19 @@ else:
     A = x*y
 
     st.write(f"Area = {A:.2f}")
+    st.subheader("Mathematical Model")
+
+    st.latex(r"2x + 3y = 300")
+
+    st.latex(r"y=\frac{300-2x}{3}")
+
+    st.latex(r"A(x)=x\left(\frac{300-2x}{3}\right)")
+
+    st.latex(r"A(x)=100x-\frac{2}{3}x^2")
+
+    st.latex(
+    rf"A({x:.2f}) = {A:.2f}"
+    )
 
     fig, ax = plt.subplots()
 
@@ -63,3 +87,4 @@ else:
 
     st.pyplot(fig)
     plt.close(fig)
+
