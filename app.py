@@ -38,7 +38,28 @@ if option == "Rectangle in a Circle":
         float(R/2),
         key="circle_slider"
     )
+    if st.button("▶ Explore Optimization"):
 
+    placeholder = st.empty()
+
+    for val in np.linspace(0.2, R-0.2, 80):
+
+        y = np.sqrt(R**2 - val**2)
+        A = 4*val*y
+
+        fig, ax = plt.subplots(figsize=(7,4))
+
+        theta = np.linspace(0,2*np.pi,400)
+        ax.plot(R*np.cos(theta), R*np.sin(theta))
+
+        rect_x=[-val,val,val,-val,-val]
+        rect_y=[-y,-y,y,y,-y]
+
+        ax.plot(rect_x,rect_y,linewidth=3)
+        ax.set_aspect('equal')
+
+        placeholder.pyplot(fig)
+        plt.close(fig)
     y = np.sqrt(R**2 - x**2)
     A = 4*x*y
 
@@ -157,3 +178,4 @@ else:
 
     st.latex(r"2x+3y=L")
     st.latex(r"A(x)=x\frac{L-2x}{3}")
+
