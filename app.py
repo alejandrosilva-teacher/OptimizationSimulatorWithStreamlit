@@ -2,180 +2,144 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 
+# ---------------------------
+# CONFIGURACIÓN GENERAL
+# ---------------------------
+
 st.set_page_config(layout="wide")
+st.title("Optimization Simulator")
 
-st.title("📈 Quadratic Optimization Simulator")
-
-option = st.sidebar.selectbox(
-    "Choose Simulation",
-    ["Rectangle in a Circle", "Rectangular Pens"]
+# Selector de problema
+problem = st.sidebar.selectbox(
+    "Choose optimization problem:",
+    ["Rectangle inside a circle", "Rectangle with fixed fence"]
 )
 
-graphs = st.container()
-controls = st.container()
-
 # =====================================================
-# SIMULACIÓN 1
-# RECTÁNGULO EN CÍRCULO
+# PROBLEMA 1 — RECTÁNGULO INSCRITO EN UN CÍRCULO
 # =====================================================
 
-if option == "Rectangle in a Circle":
+if problem == "Rectangle inside a circle":
 
-    # -------- PARAMETRO MODIFICABLE ----------
-    R = controls.number_input(
+    st.header("Rectangle Inscribed in a Circle")
+
+    # Restricción modificable
+    R = st.sidebar.number_input(
         "Circle radius",
         min_value=1.0,
-        max_value=20.0,
         value=5.0,
         step=0.5
     )
 
-    # -------- SLIDER REACTIVO ----------
-    x = controls.slider(
-        "Move x",
-        0.1,
-        float(R-0.1),
-        float(R/2),
-        key="circle_slider"
+    # Modelo matemático
+    x_vals = np.linspace(-R, R, 400)
+    area = 4 * x_vals * np.sqrt(R**2 - x_vals**2)
+
+    # Layout horizontal
+    col1, col2 = st.columns(2)
+
+    # ---------------- PARÁBOLA DEL ÁREA ----------------
+    with col1:
+
+        fig1, ax1 = plt.subplots(figsize=(8,4))
+
+        ax1.plot(x_vals, area)
+        ax1.set_title("Area function")
+        ax1.set_xlabel("x")
+        ax1.set_ylabel("Area")
+
+        st.pyplot(fig1)
+
+        st.latex(r"A(x)=4x\sqrt{R^2-x^2}")
+
+    # ---------------- SLIDER ----------------
+    x = st.slider(
+        "Move rectangle position",
+        min_value=float(0.1),
+        max_value=float(R-0.1),
+        value=float(R/2),
+        step=0.05
     )
-    if st.button("▶ Explore Optimization"):
 
-    placeholder = st.empty()
+    # ---------------- FIGURA GEOMÉTRICA ----------------
+    with col2:
 
-    for val in np.linspace(0.2, R-0.2, 80):
+        y = np.sqrt(R**2 - x**2)
 
-        y = np.sqrt(R**2 - val**2)
-        A = 4*val*y
-
-        fig, ax = plt.subplots(figsize=(7,4))
+        fig2, ax2 = plt.subplots(figsize=(8,4))
 
         theta = np.linspace(0,2*np.pi,400)
-        ax.plot(R*np.cos(theta), R*np.sin(theta))
+        ax2.plot(R*np.cos(theta), R*np.sin(theta))
 
-        rect_x=[-val,val,val,-val,-val]
-        rect_y=[-y,-y,y,y,-y]
+        rect_x = [-x,x,x,-x,-x]
+        rect_y = [-y,-y,y,y,-y]
+        ax2.plot(rect_x, rect_y)
 
-        ax.plot(rect_x,rect_y,linewidth=3)
-        ax.set_aspect('equal')
+        ax2.set_aspect("equal")
+        ax2.set_title("Geometric representation")
 
-        placeholder.pyplot(fig)
-        plt.close(fig)
-    y = np.sqrt(R**2 - x**2)
-    A = 4*x*y
+        st.pyplot(fig2)
 
-    with graphs:
-
-        col1, col2 = st.columns(2)
-
-        # ---------- PARÁBOLA ----------
-        with col1:
-
-            st.subheader("Area Function")
-
-            x_vals = np.linspace(0, R, 400)
-            A_vals = 4*x_vals*np.sqrt(R**2 - x_vals**2)
-
-            fig, ax = plt.subplots(figsize=(7,4))
-            ax.plot(x_vals, A_vals)
-            ax.plot(x, A, 'ro')
-            ax.set_xlabel("x")
-            ax.set_ylabel("Area")
-
-            st.pyplot(fig, clear_figure=True)
-
-        # ---------- GEOMETRÍA ----------
-        with col2:
-
-            st.subheader("Geometric Model")
-
-            fig2, ax2 = plt.subplots(figsize=(7,4))
-
-            theta = np.linspace(0,2*np.pi,400)
-            ax2.plot(R*np.cos(theta), R*np.sin(theta))
-
-            rect_x=[-x,x,x,-x,-x]
-            rect_y=[-y,-y,y,y,-y]
-
-            ax2.plot(rect_x,rect_y,linewidth=3)
-
-            ax2.set_aspect('equal')
-
-            st.pyplot(fig2, clear_figure=True)
-
-    st.success(f"Area = {A:.2f}")
-
-    st.latex(r"x^2+y^2=R^2")
-    st.latex(r"A(x)=4x\sqrt{R^2-x^2}")
-
+        st.write(f"Area = {4*x*y:.2f}")
 
 # =====================================================
-# SIMULACIÓN 2
-# CORRALES
+# PROBLEMA 2 — RECTÁNGULO CON CERCA FIJA
 # =====================================================
 
-else:
+if problem == "Rectangle with fixed fence":
 
-    fence = controls.number_input(
-        "Meters of fence available",
-        min_value=50.0,
-        max_value=600.0,
-        value=300.0,
-        step=10.0
+    st.header("Maximum Area Rectangle with Fixed Fence")
+
+    # Restricción modificable
+    L = st.sidebar.number_input(
+        "Available fence length (meters)",
+        min_value=4.0,
+        value=40.0,
+        step=2.0
     )
 
-    x = controls.slider(
-        "Width x",
-        1.0,
-        float(fence/2 - 1),
-        float(fence/6),
-        key="pen_slider"
+    x_vals = np.linspace(0.1, L/2, 400)
+    area = x_vals * (L/2 - x_vals)
+
+    col1, col2 = st.columns(2)
+
+    # ---------------- PARÁBOLA ----------------
+    with col1:
+
+        fig1, ax1 = plt.subplots(figsize=(8,4))
+
+        ax1.plot(x_vals, area)
+        ax1.set_title("Area function")
+        ax1.set_xlabel("Width (x)")
+        ax1.set_ylabel("Area")
+
+        st.pyplot(fig1)
+
+        st.latex(r"A(x)=x\left(\frac{L}{2}-x\right)")
+
+    # ---------------- SLIDER ----------------
+    x = st.slider(
+        "Rectangle width",
+        min_value=float(0.5),
+        max_value=float(L/2 - 0.5),
+        value=float(L/4),
+        step=0.1
     )
 
-    y = (fence - 2*x)/3
-    A = x*y
+    # ---------------- FIGURA ----------------
+    with col2:
 
-    with graphs:
+        y = L/2 - x
 
-        col1, col2 = st.columns(2)
+        fig2, ax2 = plt.subplots(figsize=(8,4))
 
-        # ---------- PARÁBOLA ----------
-        with col1:
+        rect_x = [0,x,x,0,0]
+        rect_y = [0,0,y,y,0]
+        ax2.plot(rect_x, rect_y)
 
-            st.subheader("Area Function")
+        ax2.set_aspect("equal")
+        ax2.set_title("Geometric representation")
 
-            x_vals=np.linspace(1,fence/2,400)
-            A_vals=x_vals*(fence-2*x_vals)/3
+        st.pyplot(fig2)
 
-            fig, ax = plt.subplots(figsize=(7,4))
-            ax.plot(x_vals,A_vals)
-            ax.plot(x,A,'ro')
-
-            ax.set_xlabel("x")
-            ax.set_ylabel("Area")
-
-            st.pyplot(fig, clear_figure=True)
-
-        # ---------- GEOMETRÍA ----------
-        with col2:
-
-            st.subheader("Geometric Model")
-
-            fig2, ax2 = plt.subplots(figsize=(7,4))
-
-            rect_x=[0,x,x,0,0]
-            rect_y=[0,0,y,y,0]
-
-            ax2.plot(rect_x,rect_y,linewidth=3)
-            ax2.plot([0,x],[y/2,y/2],linewidth=3)
-
-            ax2.set_aspect('equal')
-            ax2.set_xlim(0,x*1.2)
-            ax2.set_ylim(0,y*1.2)
-
-            st.pyplot(fig2, clear_figure=True)
-
-    st.success(f"Area = {A:.2f}")
-
-    st.latex(r"2x+3y=L")
-    st.latex(r"A(x)=x\frac{L-2x}{3}")
-
+        st.write(f"Area = {x*y:.2f} m²")
